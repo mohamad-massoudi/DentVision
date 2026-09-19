@@ -4,6 +4,7 @@ export interface Patient {
   id: string;
   name: string;
   age: number;
+  phone: string;
   fileNumber: string;
   lastVisit: string;
   status: PatientStatus;
@@ -23,6 +24,7 @@ export const patients: Patient[] = [
     id: "p-101",
     name: "سارا احمدی",
     age: 29,
+    phone: "۰۹۱۲۱۲۳۴۵۶۷",
     fileNumber: "DV-1405-101",
     lastVisit: "۲۲ شهریور ۱۴۰۵",
     status: "نیازمند پیگیری",
@@ -34,6 +36,7 @@ export const patients: Patient[] = [
     id: "p-102",
     name: "امیرحسین رضایی",
     age: 37,
+    phone: "۰۹۱۲۷۶۵۴۳۲۱",
     fileNumber: "DV-1405-102",
     lastVisit: "۱۸ شهریور ۱۴۰۵",
     status: "فعال",
@@ -45,6 +48,7 @@ export const patients: Patient[] = [
     id: "p-103",
     name: "نگار محمدی",
     age: 24,
+    phone: "۰۹۳۵۲۲۱۱۰۹۸",
     fileNumber: "DV-1405-103",
     lastVisit: "۹ شهریور ۱۴۰۵",
     status: "درمان تکمیل‌شده",
@@ -56,6 +60,7 @@ export const patients: Patient[] = [
     id: "p-104",
     name: "کیان نادری",
     age: 42,
+    phone: "۰۹۱۹۸۷۶۵۴۳۲",
     fileNumber: "DV-1405-104",
     lastVisit: "۲ شهریور ۱۴۰۵",
     status: "فعال",

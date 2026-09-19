@@ -3,18 +3,28 @@
 import { useEffect, useRef, useState, type ChangeEvent, type DragEvent } from "react";
 import {
   analyzeDentalImage,
-  patients,
   type AnalysisResult,
 } from "@/lib/mockData";
+import type { PatientRecord } from "@/lib/patientTypes";
 
 export default function AnalysisView() {
   const inputRef = useRef<HTMLInputElement>(null);
-  const [patientId, setPatientId] = useState(patients[0].id);
+  const [patients, setPatients] = useState<PatientRecord[]>([]);
+  const [patientId, setPatientId] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState("");
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch("/api/patients", { signal: controller.signal })
+      .then((response) => response.json())
+      .then((data: { patients?: PatientRecord[] }) => setPatients(data.patients ?? []))
+      .catch(() => {});
+    return () => controller.abort();
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -40,7 +50,7 @@ export default function AnalysisView() {
   };
 
   const handleAnalyze = async () => {
-    if (!imageFile) return;
+    if (!imageFile || !patients.length) return;
     setIsAnalyzing(true);
     setResult(null);
     const response = await analyzeDentalImage(patientId, imageFile);
@@ -48,7 +58,7 @@ export default function AnalysisView() {
     setIsAnalyzing(false);
   };
 
-  const selectedPatient = patients.find((patient) => patient.id === patientId);
+  const selectedPatient = patients.find((patient) => patient.id === patientId) ?? patients[0];
 
   return (
     <div className="mx-auto max-w-6xl">
@@ -78,7 +88,7 @@ export default function AnalysisView() {
             <div className="relative">
               <select
                 id="patient"
-                value={patientId}
+                value={selectedPatient?.id ?? ""}
                 onChange={(event) => {
                   setPatientId(event.target.value);
                   setResult(null);
@@ -87,7 +97,7 @@ export default function AnalysisView() {
               >
                 {patients.map((patient) => (
                   <option key={patient.id} value={patient.id}>
-                    {patient.name} — {patient.fileNumber}
+                    {patient.fullName} — {patient.fileNumber}
                   </option>
                 ))}
               </select>
@@ -96,7 +106,7 @@ export default function AnalysisView() {
               </svg>
             </div>
             <p className="mt-2 text-xs text-slate-400">
-              درمان فعلی: {selectedPatient?.treatment}
+              وضعیت: {selectedPatient?.status ?? "هنوز بیماری ثبت نشده است"}
             </p>
           </div>
 
@@ -155,7 +165,7 @@ export default function AnalysisView() {
           <button
             type="button"
             onClick={handleAnalyze}
-            disabled={!imageFile || isAnalyzing}
+            disabled={!imageFile || isAnalyzing || !patients.length}
             className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-sky-500 px-5 py-4 text-sm font-black text-white shadow-lg shadow-sky-500/20 transition hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none"
           >
             {isAnalyzing ? (
