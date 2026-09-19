@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "AI Vision",
-  description: "AI Vision frontend project",
+  title: "DentVision | دستیار هوشمند دندان‌پزشکی",
+  description: "سامانه تحلیل تصاویر و خلاصه پرونده‌های دندان‌پزشکی",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
