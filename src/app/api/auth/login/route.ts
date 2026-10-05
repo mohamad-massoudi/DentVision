@@ -9,17 +9,20 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ message: "درخواست نامعتبر است." }, { status: 403 });
   }
   const body = (await request.json()) as {
-    email?: string;
+    identifier?: string;
     password?: string;
   };
 
-  if (!body.email?.includes("@") || !body.password) {
-    return NextResponse.json({ message: "ایمیل و رمز عبور الزامی است." }, { status: 400 });
+  const identifier = body.identifier?.trim().toLowerCase();
+  if (!identifier || !body.password) {
+    return NextResponse.json({ message: "نام کاربری/ایمیل و رمز عبور الزامی است." }, { status: 400 });
   }
 
-  const user = await prisma.user.findUnique({ where: { email: body.email.toLowerCase().trim() } });
+  const user = await prisma.user.findFirst({
+    where: { OR: [{ username: identifier }, { email: identifier }] },
+  });
   if (!user || !(await bcrypt.compare(body.password, user.password))) {
-    return NextResponse.json({ message: "ایمیل یا رمز عبور اشتباه است." }, { status: 401 });
+    return NextResponse.json({ message: "نام کاربری/ایمیل یا رمز عبور اشتباه است." }, { status: 401 });
   }
 
   const token = await createSessionToken({ userId: user.id, role: user.role });

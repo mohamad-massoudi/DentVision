@@ -10,11 +10,14 @@ import PatientsView from "./PatientsView";
 import SettingsView from "./SettingsView";
 import SummaryView from "./SummaryView";
 import UploadView from "./UploadView";
+import ClinicsView from "./ClinicsView";
+import UsersView from "./UsersView";
 
 const defaultView: Record<Role, DashboardView> = {
-  dentist: "analysis",
-  staff: "patients",
-  patient: "my-record",
+  SUPER_ADMIN: "clinics",
+  DENTIST: "analysis",
+  STAFF: "patients",
+  PATIENT: "my-record",
 };
 
 export default function Dashboard() {
@@ -42,6 +45,8 @@ function AuthenticatedDashboard({ session, onLogout }: { session: AuthSession; o
     "my-record": <PatientPortalView mode="record" user={session.user} />,
     reports: <PatientPortalView mode="reports" user={session.user} />,
     settings: <SettingsView />,
+    clinics: <ClinicsView />,
+    users: <UsersView role={session.user.role} />,
   };
 
   return (

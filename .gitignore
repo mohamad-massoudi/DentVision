@@ -36,6 +36,9 @@ yarn-error.log*
 
 # local database
 /prisma/dev.db*
+/public/uploads/xrays/*
+!/public/uploads/xrays/.gitkeep
+/uploads/xrays/*
 
 # vercel
 .vercel

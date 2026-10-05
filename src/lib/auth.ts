@@ -1,13 +1,16 @@
 import { jwtVerify, SignJWT } from "jose";
 
-export type Role = "dentist" | "staff" | "patient";
+export type Role = "SUPER_ADMIN" | "DENTIST" | "STAFF" | "PATIENT";
 
 export interface AuthUser {
   id: string;
   name: string;
-  email: string;
+  username: string | null;
+  email: string | null;
   role: Role;
   phone: string;
+  clinicId: string | null;
+  clinic: { id: string; name: string } | null;
 }
 
 export interface AuthSession {
@@ -24,15 +27,17 @@ export const SESSION_COOKIE = "dentvision_session";
 export const SESSION_MAX_AGE = 60 * 60 * 24 * 7;
 
 export const roleLabels: Record<Role, string> = {
-  dentist: "پزشک",
-  staff: "منشی / ادمین",
-  patient: "بیمار",
+  SUPER_ADMIN: "ادمین کل سیستم",
+  DENTIST: "پزشک",
+  STAFF: "منشی / ادمین مطب",
+  PATIENT: "بیمار",
 };
 
 export const rolePermissions: Record<Role, string[]> = {
-  dentist: ["analysis", "patients", "records", "settings"],
-  staff: ["patients", "upload"],
-  patient: ["my-record", "reports"],
+  SUPER_ADMIN: ["clinics", "users", "settings"],
+  DENTIST: ["analysis", "patients", "records", "users", "settings"],
+  STAFF: ["patients", "upload"],
+  PATIENT: ["my-record", "reports"],
 };
 
 function getSecret() {
@@ -64,7 +69,7 @@ export async function verifySessionToken(token?: string | null): Promise<Session
 }
 
 export function isRole(value: unknown): value is Role {
-  return value === "dentist" || value === "staff" || value === "patient";
+  return value === "SUPER_ADMIN" || value === "DENTIST" || value === "STAFF" || value === "PATIENT";
 }
 
 export const sessionCookieOptions = {

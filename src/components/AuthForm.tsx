@@ -1,20 +1,12 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
-import { roleLabels, type Role } from "@/lib/auth";
 
-interface AuthFormProps {
-  mode: "login" | "signup";
-}
-
-export default function AuthForm({ mode }: AuthFormProps) {
+export default function AuthForm() {
   const router = useRouter();
-  const isSignup = mode === "signup";
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
-  const [role, setRole] = useState<Role>("dentist");
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -23,14 +15,12 @@ export default function AuthForm({ mode }: AuthFormProps) {
     const formData = new FormData(event.currentTarget);
 
     try {
-      const response = await fetch(`/api/auth/${isSignup ? "register" : "login"}`, {
+      const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: formData.get("name"),
-          email: formData.get("email"),
+          identifier: formData.get("identifier"),
           password: formData.get("password"),
-          ...(isSignup ? { role, invitationCode: formData.get("invitationCode") } : {}),
         }),
       });
       const data = (await response.json()) as { message?: string };
@@ -80,59 +70,28 @@ export default function AuthForm({ mode }: AuthFormProps) {
           </div>
           <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
             <h2 className="text-2xl font-black text-slate-950">
-              {isSignup ? "ساخت حساب کاربری" : "ورود به حساب کاربری"}
+              ورود به حساب کاربری
             </h2>
             <p className="mt-2 text-sm leading-6 text-slate-500">
-              {isSignup
-                ? "اطلاعات خود را وارد کنید تا حساب آزمایشی شما ساخته شود."
-                : "برای ورود به داشبورد، اطلاعات حساب خود را وارد کنید."}
+              حساب‌ها فقط توسط مدیر مجاز سیستم یا پزشک مطب ساخته می‌شوند.
             </p>
 
             <form onSubmit={handleSubmit} className="mt-7 space-y-5">
-              {isSignup && (
-                <div>
-                  <label htmlFor="name" className="mb-2 block text-sm font-bold text-slate-700">نام و نام خانوادگی</label>
-                  <input id="name" name="name" required autoComplete="name" placeholder="مثلاً دکتر لیلا کریمی" className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm outline-none transition placeholder:text-slate-400 focus:border-sky-400 focus:bg-white focus:ring-4 focus:ring-sky-100" />
-                </div>
-              )}
               <div>
-                <label htmlFor="email" className="mb-2 block text-sm font-bold text-slate-700">ایمیل</label>
-                <input id="email" name="email" type="email" required autoComplete="email" placeholder="name@example.com" dir="ltr" className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-left text-sm outline-none transition placeholder:text-slate-400 focus:border-sky-400 focus:bg-white focus:ring-4 focus:ring-sky-100" />
+                <label htmlFor="identifier" className="mb-2 block text-sm font-bold text-slate-700">نام کاربری یا ایمیل</label>
+                <input id="identifier" name="identifier" required autoComplete="username" placeholder="mohamadm" dir="ltr" className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-left text-sm outline-none transition placeholder:text-slate-400 focus:border-sky-400 focus:bg-white focus:ring-4 focus:ring-sky-100" />
               </div>
               <div>
                 <label htmlFor="password" className="mb-2 block text-sm font-bold text-slate-700">رمز عبور</label>
-                <input id="password" name="password" type="password" required minLength={isSignup ? 8 : 1} maxLength={72} autoComplete={isSignup ? "new-password" : "current-password"} placeholder={isSignup ? "حداقل ۸ کاراکتر" : "رمز عبور"} dir="ltr" className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-left text-sm outline-none transition placeholder:text-slate-400 focus:border-sky-400 focus:bg-white focus:ring-4 focus:ring-sky-100" />
+                <input id="password" name="password" type="password" required maxLength={72} autoComplete="current-password" placeholder="رمز عبور" dir="ltr" className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-left text-sm outline-none transition placeholder:text-slate-400 focus:border-sky-400 focus:bg-white focus:ring-4 focus:ring-sky-100" />
               </div>
-              {isSignup && (
-                <div>
-                  <label htmlFor="role" className="mb-2 block text-sm font-bold text-slate-700">نقش کاربری</label>
-                  <select id="role" value={role} onChange={(event) => setRole(event.target.value as Role)} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm font-bold outline-none transition focus:border-sky-400 focus:bg-white focus:ring-4 focus:ring-sky-100">
-                    {(Object.entries(roleLabels) as Array<[Role, string]>).map(([value, label]) => (
-                      <option key={value} value={value}>{label}</option>
-                    ))}
-                  </select>
-                </div>
-              )}
-              {isSignup && role !== "patient" && (
-                <div>
-                  <label htmlFor="invitationCode" className="mb-2 block text-sm font-bold text-slate-700">کد دعوت کارکنان</label>
-                  <input id="invitationCode" name="invitationCode" type="password" required autoComplete="off" placeholder="کد دعوت صادرشده توسط کلینیک" dir="ltr" className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-left text-sm outline-none transition placeholder:text-slate-400 focus:border-sky-400 focus:bg-white focus:ring-4 focus:ring-sky-100" />
-                </div>
-              )}
 
               {error && <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700 ring-1 ring-red-100">{error}</p>}
 
               <button type="submit" disabled={isSubmitting} className="flex w-full items-center justify-center rounded-2xl bg-sky-500 px-5 py-4 text-sm font-black text-white shadow-lg shadow-sky-500/20 transition hover:bg-sky-600 disabled:cursor-wait disabled:opacity-60">
-                {isSubmitting ? "لطفاً صبر کنید..." : isSignup ? "ایجاد حساب" : "ورود به داشبورد"}
+                {isSubmitting ? "لطفاً صبر کنید..." : "ورود به داشبورد"}
               </button>
             </form>
-
-            <p className="mt-6 text-center text-sm text-slate-500">
-              {isSignup ? "قبلاً حساب ساخته‌اید؟" : "هنوز حساب ندارید؟"}{" "}
-              <Link href={isSignup ? "/login" : "/signup"} className="font-black text-sky-600 hover:text-sky-700">
-                {isSignup ? "وارد شوید" : "ثبت‌نام کنید"}
-              </Link>
-            </p>
           </div>
           <p className="mt-4 text-center text-xs leading-5 text-slate-400">
             اطلاعات حساب به‌صورت امن در دیتابیس DentVision نگهداری می‌شود.

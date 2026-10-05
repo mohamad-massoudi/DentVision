@@ -1,5 +1,39 @@
 # DentVision — Project Context
 
+## اصلاح ورودی صوت گزارش درمان
+
+- تبدیل صوت فارسی یا انگلیسی با انتخاب زبان در پنل گزارش پزشک انجام می‌شود.
+- متن صوت ابتدا در پیش‌نمایش قابل ویرایش نمایش داده می‌شود و فقط با تأیید پزشک به کادر گزارش اضافه می‌شود.
+- دکمه ذخیره گزارش متن تأییدشده را از طریق API گزارش در MedicalReport و سابقه پرونده به صورت transaction ذخیره می‌کند.
+- جابه‌جایی بیمار هنگام ضبط و ذخیره مسدود است؛ نتایج تکراری گفتار به گزارش اضافه نمی‌شوند.
+- صحت تشخیص صدای واقعی هنوز با میکروفون آزمایش نشده است.
+
+## وضعیت توسعه — ۲۰۲۶/۱۰/۰۵
+
+- متن‌های رابط کاربری و پیام‌های خراب API اصلاح شدند.
+- ساخت پزشک/منشی توسط مدیر کل با انتخاب کلینیک و ساخت منشی توسط پزشک پیاده‌سازی شد.
+- فرم بیمار امکان ایجاد حساب شخصی بیمار را دارد.
+- گزارش‌های درمان در مدل MedicalReport با نویسنده، بیمار و تاریخ ذخیره می‌شوند؛ ذخیره گزارش و به‌روزرسانی پرونده در transaction انجام می‌شود.
+- پنل بیمار گزارش‌ها و تصاویر پرونده متصل به حساب خودش را دریافت می‌کند.
+- تصاویر جدید در uploads/xrays خارج از public ذخیره شده و فقط با /api/images/[id] و کنترل نقش و مالکیت نمایش داده می‌شوند.
+- ورودی صوت مرورگر برای فارسی و انگلیسی با انتخاب زبان اضافه شد؛ دقت بالا برای گفتار ترکیبی یا اصطلاحات تخصصی تضمین نشده و متن قبل از ذخیره قابل ویرایش است.
+- بررسی گفتار با میکروفون واقعی و آزمون کامل مرورگری هنوز انجام نشده است.
+
+## Update: September 27, 2026
+
+- Added multi-tenant Prisma models for `Clinic`, `User`, `Patient`, and `XRayImage` with roles `SUPER_ADMIN`, `DENTIST`, `STAFF`, and `PATIENT`.
+- Removed public signup and invitation-code flow. Login accepts username or email. Initial account: `mohamadm` / `mass`.
+- Added clinic, user, patient, patient-detail, and X-ray upload APIs under `/api/clinics`, `/api/users`, `/api/patients`, and `/api/patients/[id]/images`.
+- X-rays are stored in `public/uploads/xrays`; `/api/images/[id]` enforces authenticated clinic/patient access.
+- `npm run lint`, `npx tsc --noEmit`, and `npm run build` completed successfully.
+
+### Login and smoke test
+
+1. Run `npm run dev` and open `http://localhost:3000/login`.
+2. Sign in with `mohamadm` and `mass`.
+3. As Super Admin, create a clinic and its dentist account; the dentist can create staff and patients.
+4. Staff can create patients and upload images; a patient can only view their own record and images.
+
 > آخرین به‌روزرسانی: 2026-09-19  
 > وضعیت پروژه: MVP فرانت‌اند قابل اجرا و بدون بک‌اند واقعی
 
@@ -267,4 +301,3 @@ Tailwind CSS، رنگ‌های پایه، فونت عمومی و تنظیمات 
 - قبل از تحویل هر تغییر، حداقل `npm run lint` اجرا شود.
 - برای تغییرات ساختاری مهم، `npm run build` نیز اجرا شود.
 - فایل حاضر پس از تغییرات مهم پروژه به‌روزرسانی شود.
-

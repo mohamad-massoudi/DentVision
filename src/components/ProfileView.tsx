@@ -67,7 +67,7 @@ function ProfileForm({ session, refresh, logout }: { session: AuthSession; refre
             </div>
             <div>
               <label className="mb-2 block text-sm font-bold text-slate-700">ایمیل</label>
-              <input value={session.user.email} readOnly dir="ltr" className="w-full cursor-not-allowed rounded-2xl border border-slate-200 bg-slate-100 px-4 py-3.5 text-left text-sm text-slate-500" />
+              <input value={session.user.email ?? ""} readOnly dir="ltr" className="w-full cursor-not-allowed rounded-2xl border border-slate-200 bg-slate-100 px-4 py-3.5 text-left text-sm text-slate-500" />
             </div>
             <div>
               <label htmlFor="profile-phone" className="mb-2 block text-sm font-bold text-slate-700">شماره تماس</label>

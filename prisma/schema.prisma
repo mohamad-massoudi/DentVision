@@ -1,43 +1,105 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "sqlite"
+  url      = env("DATABASE_URL")
 }
 
 enum Role {
-  dentist
-  staff
-  patient
+  SUPER_ADMIN
+  DENTIST
+  STAFF
+  PATIENT
 }
 
-model User {
+model Clinic {
   id        String    @id @default(cuid())
   name      String
-  email     String    @unique
-  password  String
-  role      Role
-  phone     String?
+  address   String
+  phone     String
+  users     User[]
   patients  Patient[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+
+  @@index([name])
+}
+
+model User {
+  id              String    @id @default(cuid())
+  username        String?   @unique
+  email           String?   @unique
+  password        String
+  name            String
+  phone           String?
+  role            Role
+  clinicId        String?
+  clinic          Clinic?   @relation(fields: [clinicId], references: [id], onDelete: SetNull)
+  creatorId       String?
+  creator         User?     @relation("UserCreator", fields: [creatorId], references: [id], onDelete: SetNull)
+  createdUsers    User[]    @relation("UserCreator")
+  createdPatients Patient[] @relation("PatientCreator")
+  authoredReports MedicalReport[] @relation("ReportAuthor")
+  patient         Patient?  @relation("PatientAccount")
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([clinicId])
+  @@index([creatorId])
+  @@index([role])
 }
 
 model Patient {
-  id             String   @id @default(cuid())
+  id             String      @id @default(cuid())
   fullName       String
-  fileNumber     String   @unique
+  nationalId     String
+  fileNumber     String
   age            Int
   phone          String
   status         String
   medicalHistory String?
+  clinicId       String
+  clinic         Clinic      @relation(fields: [clinicId], references: [id], onDelete: Cascade)
   creatorId      String
-  creator        User     @relation(fields: [creatorId], references: [id], onDelete: Restrict)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  creator        User        @relation("PatientCreator", fields: [creatorId], references: [id], onDelete: Restrict)
+  userId         String?     @unique
+  user           User?       @relation("PatientAccount", fields: [userId], references: [id], onDelete: SetNull)
+  images         XRayImage[]
+  reports        MedicalReport[]
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
 
+  @@unique([clinicId, fileNumber])
+  @@unique([clinicId, nationalId])
+  @@index([clinicId])
   @@index([creatorId])
   @@index([fullName])
+}
+
+model MedicalReport {
+  id        String   @id @default(cuid())
+  content   String
+  patientId String
+  patient   Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User     @relation("ReportAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([patientId, createdAt])
+}
+
+model XRayImage {
+  id         String   @id @default(cuid())
+  url        String
+  fileName   String
+  fileSize   Int
+  mimeType   String
+  uploadedAt DateTime @default(now())
+  patientId  String
+  patient    Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  @@index([patientId])
 }
