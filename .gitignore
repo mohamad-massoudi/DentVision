@@ -36,6 +36,7 @@ yarn-error.log*
 
 # local database
 /prisma/dev.db*
+/prisma/dev-before-notifications-*.db
 /public/uploads/xrays/*
 !/public/uploads/xrays/.gitkeep
 /uploads/xrays/*

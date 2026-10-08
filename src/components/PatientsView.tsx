@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import type { NewPatientInput, PatientRecord } from "@/lib/patientTypes";
 import AddPatientModal from "./AddPatientModal";
+import EditPatientModal from "./EditPatientModal";
 
 export default function PatientsView() {
   const [patients, setPatients] = useState<PatientRecord[]>([]);
@@ -10,6 +11,7 @@ export default function PatientsView() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [editing, setEditing] = useState<PatientRecord | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -66,7 +68,7 @@ export default function PatientsView() {
 
         <div className="overflow-x-auto">
           <table className="w-full min-w-[760px] text-right text-sm">
-            <thead><tr className="border-y border-slate-100 text-xs text-slate-400"><th className="px-3 py-4 font-bold">بیمار</th><th className="px-3 py-4 font-bold">شماره پرونده</th><th className="px-3 py-4 font-bold">تماس</th><th className="px-3 py-4 font-bold">درمان فعلی</th><th className="px-3 py-4 font-bold">وضعیت</th></tr></thead>
+            <thead><tr className="border-y border-slate-100 text-xs text-slate-400"><th className="px-3 py-4 font-bold">بیمار</th><th className="px-3 py-4 font-bold">شماره پرونده</th><th className="px-3 py-4 font-bold">تماس</th><th className="px-3 py-4 font-bold">درمان فعلی</th><th className="px-3 py-4 font-bold">وضعیت</th><th className="px-3 py-4 font-bold">عملیات</th></tr></thead>
             <tbody>
               {patients.map((patient) => (
                 <tr key={patient.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50/70">
@@ -75,6 +77,7 @@ export default function PatientsView() {
                   <td className="px-3 py-4 text-slate-600" dir="ltr">{patient.phone}</td>
                   <td className="max-w-56 truncate px-3 py-4 text-slate-600">{patient.medicalHistory || "ثبت نشده"}</td>
                   <td className="px-3 py-4"><span className="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-600">{patient.status}</span></td>
+                  <td className="px-3 py-4"><button type="button" onClick={() => setEditing(patient)} className="rounded-xl bg-sky-50 px-3 py-2 font-bold text-sky-700">ویرایش پرونده</button></td>
                 </tr>
               ))}
             </tbody>
@@ -84,6 +87,7 @@ export default function PatientsView() {
       </section>
 
       <AddPatientModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onAdd={addPatient} />
+      {editing && <EditPatientModal key={editing.id} patient={editing} onClose={() => setEditing(null)} onSaved={updated => setPatients(current => current.map(patient => patient.id === updated.id ? updated : patient))} />}
     </div>
   );
 }

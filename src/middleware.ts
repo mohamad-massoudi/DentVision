@@ -13,9 +13,8 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  if (session && isAuthPage) {
-    return NextResponse.redirect(new URL("/", request.url));
-  }
+  // Login performs the definitive database-backed check. Redirecting here with
+  // a revoked but still signed JWT would cause a login/dashboard redirect loop.
 
   return NextResponse.next();
 }

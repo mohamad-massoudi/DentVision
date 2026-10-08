@@ -1,4 +1,4 @@
-import { jwtVerify, SignJWT } from "jose";
+import { base64url, jwtVerify, SignJWT } from "jose";
 
 export type Role = "SUPER_ADMIN" | "DENTIST" | "STAFF" | "PATIENT";
 
@@ -21,6 +21,7 @@ export interface AuthSession {
 export interface SessionPayload {
   userId: string;
   role: Role;
+  credentialTag: string;
 }
 
 export const SESSION_COOKIE = "dentvision_session";
@@ -34,10 +35,10 @@ export const roleLabels: Record<Role, string> = {
 };
 
 export const rolePermissions: Record<Role, string[]> = {
-  SUPER_ADMIN: ["clinics", "users", "settings"],
-  DENTIST: ["analysis", "patients", "records", "users", "settings"],
-  STAFF: ["patients", "upload"],
-  PATIENT: ["my-record", "reports"],
+  SUPER_ADMIN: ["clinics", "users", "settings", "notifications"],
+  DENTIST: ["analysis", "patients", "records", "users", "settings", "notifications"],
+  STAFF: ["patients", "upload", "settings", "notifications"],
+  PATIENT: ["my-record", "reports", "settings", "notifications"],
 };
 
 function getSecret() {
@@ -49,7 +50,7 @@ function getSecret() {
 }
 
 export async function createSessionToken(payload: SessionPayload) {
-  return new SignJWT({ role: payload.role })
+  return new SignJWT({ role: payload.role, credentialTag: payload.credentialTag })
     .setProtectedHeader({ alg: "HS256", typ: "JWT" })
     .setSubject(payload.userId)
     .setIssuedAt()
@@ -61,11 +62,27 @@ export async function verifySessionToken(token?: string | null): Promise<Session
   if (!token) return null;
   try {
     const { payload } = await jwtVerify(token, getSecret(), { algorithms: ["HS256"] });
-    if (!payload.sub || !isRole(payload.role)) return null;
-    return { userId: payload.sub, role: payload.role };
+    if (!payload.sub || !isRole(payload.role) || typeof payload.credentialTag !== "string" || !/^[A-Za-z0-9_-]{43}$/.test(payload.credentialTag)) return null;
+    return { userId: payload.sub, role: payload.role, credentialTag: payload.credentialTag };
   } catch {
     return null;
   }
+}
+
+// Keyed digest binds a session to the current password hash without exposing it.
+async function credentialKey() {
+  return crypto.subtle.importKey("raw", getSecret(), { name: "HMAC", hash: "SHA-256" }, false, ["sign", "verify"]);
+}
+
+export async function createCredentialTag(passwordHash: string) {
+  const signature = await crypto.subtle.sign("HMAC", await credentialKey(), new TextEncoder().encode(`dentvision-session:${passwordHash}`));
+  return base64url.encode(new Uint8Array(signature));
+}
+
+export async function verifyCredentialTag(tag: string, passwordHash: string) {
+  try {
+    return await crypto.subtle.verify("HMAC", await credentialKey(), new Uint8Array(base64url.decode(tag)), new TextEncoder().encode(`dentvision-session:${passwordHash}`));
+  } catch { return false; }
 }
 
 export function isRole(value: unknown): value is Role {

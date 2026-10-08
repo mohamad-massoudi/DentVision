@@ -1,19 +1,24 @@
 import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { SESSION_COOKIE, verifySessionToken, type Role } from "@/lib/auth";
+import { SESSION_COOKIE, verifySessionToken, verifyCredentialTag, type Role } from "@/lib/auth";
 
 export async function getSessionPayload(request: NextRequest) {
   return verifySessionToken(request.cookies.get(SESSION_COOKIE)?.value);
 }
 
 export async function getCurrentUser(request: NextRequest) {
-  const payload = await getSessionPayload(request);
+  return getUserForToken(request.cookies.get(SESSION_COOKIE)?.value);
+}
+
+export async function getUserForToken(token?: string) {
+  const payload = await verifySessionToken(token);
   if (!payload) return null;
 
-  return prisma.user.findUnique({
+  const user = await prisma.user.findUnique({
     where: { id: payload.userId },
     select: {
       id: true,
+      password: true,
       name: true,
       username: true,
       email: true,
@@ -25,6 +30,10 @@ export async function getCurrentUser(request: NextRequest) {
       updatedAt: true,
     },
   });
+  if (!user || user.role !== payload.role || !await verifyCredentialTag(payload.credentialTag, user.password)) return null;
+  const { password, ...profile } = user;
+  void password;
+  return profile;
 }
 
 export function hasRole(role: Role, allowedRoles: Role[]) {

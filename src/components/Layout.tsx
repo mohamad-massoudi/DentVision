@@ -2,17 +2,19 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { roleLabels, type AuthUser, type Role } from "@/lib/auth";
 
-export type DashboardView = "analysis" | "patients" | "records" | "upload" | "my-record" | "reports" | "settings" | "clinics" | "users";
+export type DashboardView = "analysis" | "patients" | "records" | "upload" | "my-record" | "reports" | "settings" | "clinics" | "users" | "notifications";
 interface NavItem { id: DashboardView; label: string; description: string }
 
 const roleNavigation: Record<Role, NavItem[]> = {
   SUPER_ADMIN: [
     { id: "clinics", label: "کلینیک‌ها", description: "مدیریت مطب‌ها و کلینیک‌ها" },
+    { id: "notifications", label: "اعلان‌ها", description: "رویدادهای پرونده‌ها" },
     { id: "users", label: "کاربران سیستم", description: "مدیریت حساب‌های مجاز" },
     { id: "settings", label: "تنظیمات", description: "تنظیمات کلی سامانه" },
   ],
   DENTIST: [
     { id: "analysis", label: "تحلیل تصویر", description: "پنل تحلیل هوشمند" },
+    { id: "notifications", label: "اعلان‌ها", description: "رویدادهای کلینیک" },
     { id: "patients", label: "مدیریت بیماران", description: "افزودن و ویرایش بیمار" },
     { id: "records", label: "خلاصه پرونده", description: "سوابق و گزارش‌ها" },
     { id: "users", label: "کارکنان کلینیک", description: "ساخت حساب منشی" },
@@ -21,10 +23,14 @@ const roleNavigation: Record<Role, NavItem[]> = {
   STAFF: [
     { id: "patients", label: "مدیریت بیماران", description: "پرونده‌های کلینیک" },
     { id: "upload", label: "آپلود تصویر", description: "ثبت تصویر رادیولوژی" },
+    { id: "notifications", label: "اعلان‌ها", description: "رویدادهای کلینیک" },
+    { id: "settings", label: "تنظیمات", description: "اطلاعات حساب کاربری" },
   ],
   PATIENT: [
     { id: "my-record", label: "پرونده من", description: "اطلاعات درمانی شخصی" },
+    { id: "notifications", label: "اعلان‌ها", description: "گزارش و تصویر جدید" },
     { id: "reports", label: "گزارش‌های من", description: "خلاصه و سوابق درمان" },
+    { id: "settings", label: "تنظیمات", description: "اطلاعات حساب کاربری" },
   ],
 };
 

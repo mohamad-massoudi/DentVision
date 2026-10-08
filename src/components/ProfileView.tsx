@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { roleLabels, type AuthSession } from "@/lib/auth";
 import { useSession } from "@/lib/useSession";
+import ChangePasswordForm from "./ChangePasswordForm";
 
 export default function ProfileView() {
   const { session, isLoading, refresh, logout } = useSession();
@@ -24,18 +25,21 @@ function ProfileForm({ session, refresh, logout }: { session: AuthSession; refre
     event.preventDefault();
     setIsSaving(true);
     setMessage("");
-    const response = await fetch("/api/user/profile", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, phone }),
-    });
-    if (response.ok) {
-      await refresh();
-      setMessage("اطلاعات پروفایل با موفقیت به‌روزرسانی شد.");
-    } else {
-      setMessage("به‌روزرسانی اطلاعات انجام نشد.");
-    }
-    setIsSaving(false);
+    try {
+      const response = await fetch("/api/user/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, phone }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        await refresh();
+        setMessage("اطلاعات پروفایل با موفقیت به‌روزرسانی شد.");
+      } else {
+        setMessage(data.message ?? "به‌روزرسانی اطلاعات انجام نشد.");
+      }
+    } catch { setMessage("ارتباط با سرور برقرار نشد؛ دوباره تلاش کنید."); }
+    finally { setIsSaving(false); }
   };
 
   return (
@@ -82,6 +86,7 @@ function ProfileForm({ session, refresh, logout }: { session: AuthSession; refre
             </div>
           </form>
         </section>
+        <ChangePasswordForm />
       </div>
     </main>
   );

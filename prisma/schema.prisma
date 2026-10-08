@@ -43,12 +43,21 @@ model User {
   createdPatients Patient[] @relation("PatientCreator")
   authoredReports MedicalReport[] @relation("ReportAuthor")
   patient         Patient?  @relation("PatientAccount")
+  notificationPreference UserNotificationPreference?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
   @@index([clinicId])
   @@index([creatorId])
   @@index([role])
+}
+
+model UserNotificationPreference {
+  userId     String   @id
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  enabled    Boolean  @default(true)
+  lastReadAt DateTime?
+  updatedAt  DateTime @updatedAt
 }
 
 model Patient {

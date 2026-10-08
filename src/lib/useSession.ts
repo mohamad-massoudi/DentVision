@@ -14,10 +14,11 @@ export function useSession() {
       const response = await fetch("/api/auth/me", { cache: "no-store" });
       const data = (await response.json()) as { session: AuthSession | null };
       setSession(data.session);
+      if (response.status === 401) router.replace("/login");
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     void refresh();

@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 import { NextResponse, type NextRequest } from "next/server";
-import { createSessionToken, SESSION_COOKIE, sessionCookieOptions } from "@/lib/auth";
+import { createCredentialTag, createSessionToken, SESSION_COOKIE, sessionCookieOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { isSameOrigin } from "@/lib/serverAuth";
 
@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ message: "نام کاربری/ایمیل یا رمز عبور اشتباه است." }, { status: 401 });
   }
 
-  const token = await createSessionToken({ userId: user.id, role: user.role });
+  const token = await createSessionToken({ userId: user.id, role: user.role, credentialTag: await createCredentialTag(user.password) });
   const response = NextResponse.json({ success: true });
   response.cookies.set(SESSION_COOKIE, token, sessionCookieOptions);
   return response;

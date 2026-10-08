@@ -45,3 +45,28 @@ input {
   background: #fff;
   box-shadow: 0 0 0 4px #e0f2fe;
 }
+
+/* Dedicated report page: no dashboard chrome and no fixed-height text boxes. */
+.medical-report-sheet { width: min(100%, 210mm); min-height: 297mm; margin: 0 auto; padding: 18mm; background: white; color: #0f172a; box-shadow: 0 8px 30px #0f172a15; overflow-wrap: anywhere; font-family: Tahoma, Arial, sans-serif; }
+.report-letterhead { border-bottom: 2px solid #0ea5e9; padding-bottom: 6mm; }
+.report-mark { display: grid; place-items: center; width: 16mm; height: 16mm; border: 1px solid #0ea5e9; border-radius: 4mm; color: #0284c7; }
+.report-section-title { margin-bottom: 3mm; padding-bottom: 2mm; border-bottom: 1px solid #cbd5e1; font-weight: 700; font-size: 11pt; color: #0369a1; }
+.report-details { width: 100%; border-collapse: collapse; font-size: 10pt; }
+.report-details th, .report-details td { padding: 3mm; border: 1px solid #e2e8f0; text-align: right; vertical-align: top; }
+.report-details th { width: 18%; background: #f8fafc; }
+.report-details td { width: 32%; }
+.report-body { font-size: 11pt; line-height: 1.9; orphans: 3; widows: 3; }
+.report-images { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4mm; }
+.report-images figure { margin: 0; border: 1px solid #e2e8f0; padding: 3mm; break-inside: avoid; }
+.report-images img { width: 100%; height: 55mm; object-fit: contain; }
+.report-images figcaption { margin-top: 2mm; font-size: 9pt; line-height: 1.7; }
+.report-signature { margin-top: 10mm; break-inside: avoid; }
+@page { size: A4 portrait; margin: 18mm; }
+@media print {
+  html, body { background: white !important; }
+  .report-print-page { margin: 0 !important; padding: 0 !important; background: white !important; }
+  .medical-report-sheet { width: 100%; min-height: 0; padding: 0; margin: 0; box-shadow: none; }
+  .medical-report-sheet { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .report-letterhead, .report-details tr { break-inside: avoid; }
+  .report-section-title { break-after: avoid; }
+}

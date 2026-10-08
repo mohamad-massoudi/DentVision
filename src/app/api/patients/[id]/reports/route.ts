@@ -21,7 +21,7 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
   if (!patient) return NextResponse.json({ message: "پرونده پیدا نشد." }, { status: 404 });
   const { content } = await request.json() as { content?: string };
   const cleaned = typeof content === "string" ? content.trim() : "";
-  if (!cleaned || cleaned.length > 10000) return NextResponse.json({ message: "متن گزارش باید بین ۱ تا ۱۰۰۰۰ نویسه باشد." }, { status: 400 });
+  if (!cleaned || cleaned.length > 50000) return NextResponse.json({ message: "متن گزارش باید بین ۱ تا ۵۰۰۰۰ نویسه باشد." }, { status: 400 });
   const report = await prisma.$transaction(async tx => {
     const saved = await tx.medicalReport.create({ data: { content: cleaned, patientId: id, authorId: user.id }, include: { author: { select: { name: true } } } });
     await tx.patient.update({ where: { id }, data: { medicalHistory: cleaned } });

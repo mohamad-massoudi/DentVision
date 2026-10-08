@@ -12,6 +12,7 @@ import SummaryView from "./SummaryView";
 import UploadView from "./UploadView";
 import ClinicsView from "./ClinicsView";
 import UsersView from "./UsersView";
+import NotificationsView from "./NotificationsView";
 
 const defaultView: Record<Role, DashboardView> = {
   SUPER_ADMIN: "clinics",
@@ -21,16 +22,16 @@ const defaultView: Record<Role, DashboardView> = {
 };
 
 export default function Dashboard() {
-  const { session, isLoading, logout } = useSession();
+  const { session, isLoading, logout, refresh } = useSession();
 
   if (isLoading || !session) {
     return <div className="grid min-h-screen place-items-center bg-slate-50"><div className="text-center"><span className="mx-auto block size-8 animate-spin rounded-full border-4 border-sky-100 border-t-sky-500" /><p className="mt-4 text-sm text-slate-500">در حال آماده‌سازی داشبورد...</p></div></div>;
   }
 
-  return <AuthenticatedDashboard key={session.user.role} session={session} onLogout={logout} />;
+  return <AuthenticatedDashboard key={session.user.role} session={session} onLogout={logout} onRefresh={refresh} />;
 }
 
-function AuthenticatedDashboard({ session, onLogout }: { session: AuthSession; onLogout: () => Promise<void> }) {
+function AuthenticatedDashboard({ session, onLogout, onRefresh }: { session: AuthSession; onLogout: () => Promise<void>; onRefresh: () => Promise<void> }) {
   const [activeView, setActiveView] = useState<DashboardView>(defaultView[session.user.role]);
   const allowedViews = rolePermissions[session.user.role] as DashboardView[];
   const safeView = allowedViews.includes(activeView)
@@ -44,9 +45,10 @@ function AuthenticatedDashboard({ session, onLogout }: { session: AuthSession; o
     upload: <UploadView />,
     "my-record": <PatientPortalView mode="record" user={session.user} />,
     reports: <PatientPortalView mode="reports" user={session.user} />,
-    settings: <SettingsView />,
+    settings: <SettingsView user={session.user} refresh={onRefresh} />,
     clinics: <ClinicsView />,
     users: <UsersView role={session.user.role} />,
+    notifications: <NotificationsView />,
   };
 
   return (
